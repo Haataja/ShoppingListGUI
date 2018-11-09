@@ -53,11 +53,36 @@ public class Main extends Application {
         MenuBar menu = new MenuBar();
         menu.setPrefWidth(primaryScreenBounds.getWidth() - 1);
         Menu file = new Menu("File");
-        menu.getMenus().addAll(file);
+        Menu save = new Menu("Save");
+        MenuItem toFile = new MenuItem("to file");
+        MenuItem toDropBox = new MenuItem("to Dropbox");
+        MenuItem toH2 = new MenuItem("to H2-database");
+        save.getItems().addAll(toFile, toDropBox, toH2);
+        Menu open = new Menu("Open");
+        MenuItem fromFile = new MenuItem("from file");
+        MenuItem fromDropBox = new MenuItem("from Dropbox");
+        MenuItem fromH2 = new MenuItem("from H2-database");
+        open.getItems().addAll(fromFile,fromDropBox,fromH2);
+        file.getItems().addAll(save, open);
+
+        Menu about = new Menu("About");
+        MenuItem help = new MenuItem("Help");
+        SeparatorMenuItem separator = new SeparatorMenuItem();
+        MenuItem info = new MenuItem("Info");
+        info.setOnAction(event -> setDialog());
+        about.getItems().addAll(help,separator,info);
+        menu.getMenus().addAll(file,about);
 
         return menu;
     }
 
+    private void setDialog() {
+        Alert dialog = new Alert(Alert.AlertType.INFORMATION);
+        dialog.setTitle("Shopping list app");
+        dialog.setHeaderText("Copyright Hanna Haataja 2018");
+        dialog.setContentText(null);
+        dialog.showAndWait();
+    }
 
     private VBox setTable() {
         Label label = new Label("SHOPPING LIST");

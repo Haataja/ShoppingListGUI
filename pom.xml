@@ -14,7 +14,7 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>fi.tamk.tiko.Main</mainClass>
+                    <mainClass>Main</mainClass>
                 </configuration>
             </plugin>
             <plugin>

@@ -1,3 +1,5 @@
+import fi.tamk.tiko.JSONArray;
+import fi.tamk.tiko.JSONObject;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -12,10 +14,15 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
+import javafx.stage.FileChooser;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.converter.IntegerStringConverter;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
 
 public class Main extends Application {
@@ -27,6 +34,7 @@ public class Main extends Application {
     private TableView<Item> table;
     private final ObservableList<Item> data =
             FXCollections.observableArrayList();
+    private Stage stage;
 
     public static void main(String[] args) {
         System.out.println("Author: Hanna Haataja");
@@ -35,6 +43,7 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) {
+        stage = primaryStage;
         primaryStage.setTitle("Shopping list app");
         group = new BorderPane();
         group.setTop(new HBox(setMenu()));
@@ -56,6 +65,7 @@ public class Main extends Application {
         Menu file = new Menu("File");
         Menu save = new Menu("Save");
         MenuItem toFile = new MenuItem("to file");
+        toFile.setOnAction(e -> setSaveToFileDialog());
         MenuItem toDropBox = new MenuItem("to Dropbox");
         MenuItem toH2 = new MenuItem("to H2-database");
         save.getItems().addAll(toFile, toDropBox, toH2);
@@ -80,8 +90,8 @@ public class Main extends Application {
     private void setDialog() {
         Alert dialog = new Alert(Alert.AlertType.INFORMATION);
         dialog.setTitle("Shopping list app");
-        dialog.setHeaderText("Copyright Hanna Haataja 2018");
-        dialog.setContentText(null);
+        dialog.setHeaderText(null);
+        dialog.setContentText("Copyright Hanna Haataja 2018");
         dialog.showAndWait();
     }
 
@@ -147,5 +157,30 @@ public class Main extends Application {
         hBox.setPadding(new Insets(0, 20, 20, 50));
         hBox.setSpacing(3);
         return hBox;
+    }
+
+    private void setSaveToFileDialog() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save Shopping list");
+        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("JSON", "*.json"));
+        File file = fileChooser.showSaveDialog(stage);
+        if (file != null) {
+            try {
+                JSONObject object = new JSONObject();
+                JSONArray array = new JSONArray();
+                for(Item item:data){
+                    JSONObject jsonItem = new JSONObject();
+                    jsonItem.put("item",item.getName());
+                    jsonItem.put("quantity", item.getQuantity());
+                    array.add(jsonItem);
+                }
+                object.put("list",array);
+                FileWriter fileWriter = new FileWriter(file);
+                fileWriter.write(object.toJsonString());
+                fileWriter.close();
+            } catch (IOException ex) {
+                System.out.println(ex.getMessage());
+            }
+        }
     }
 }

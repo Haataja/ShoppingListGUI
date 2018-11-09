@@ -1,7 +1,6 @@
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Rectangle2D;
@@ -23,7 +22,7 @@ public class Main extends Application {
     Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
     private BorderPane group;
     private Scene scene;
-    private int width = Math.round((float) primaryScreenBounds.getWidth()/3);
+    private int width = Math.round((float) primaryScreenBounds.getWidth() / 3);
     private int height = 640;
     private TableView<Item> table;
     private final ObservableList<Item> data =
@@ -43,12 +42,13 @@ public class Main extends Application {
         scene = new Scene(group, width, height);
         primaryStage.setScene(scene);
         primaryStage.initStyle(StageStyle.DECORATED);
-        primaryStage.setX((primaryScreenBounds.getWidth()- scene.getWidth()) / 2f);
+        primaryStage.setX((primaryScreenBounds.getWidth() - scene.getWidth()) / 2f);
         primaryStage.setY((primaryScreenBounds.getHeight() - scene.getHeight()) / 2f);
         primaryStage.show();
-        table.getColumns().get(1).setPrefWidth(table.getWidth()/3);
-        table.getColumns().get(0).setPrefWidth(2*table.getWidth()/3);
+        table.getColumns().get(1).setPrefWidth(table.getWidth() / 3);
+        table.getColumns().get(0).setPrefWidth(2 * table.getWidth() / 3);
     }
+
     private MenuBar setMenu() {
         MenuBar menu = new MenuBar();
         menu.setPrefWidth(primaryScreenBounds.getWidth() - 1);
@@ -59,23 +59,33 @@ public class Main extends Application {
     }
 
 
-    private VBox setTable(){
+    private VBox setTable() {
         Label label = new Label("SHOPPING LIST");
         label.setFont(new Font("Arial", 15));
         table = new TableView<>();
-        table.setPrefHeight(0.8*height);
+        table.setPrefHeight(0.8 * height);
         table.setEditable(true);
         TableColumn first = new TableColumn("Quantity");
         TableColumn second = new TableColumn("Item");
-        second.setCellValueFactory(new PropertyValueFactory<Item,String>("name"));
+        second.setCellValueFactory(new PropertyValueFactory<Item, String>("name"));
         second.setCellFactory(TextFieldTableCell.forTableColumn());
-        second.setOnEditCommit((EventHandler<TableColumn.CellEditEvent<Item, String>>) t ->
-                t.getTableView().getItems().get(t.getTablePosition().getRow()).setName(t.getNewValue()));
-        first.setCellValueFactory(new PropertyValueFactory<Item,Integer>("quantity"));
+        second.setOnEditCommit((EventHandler<TableColumn.CellEditEvent<Item, String>>) t -> {
+            if (t.getNewValue().length() > 0) {
+                t.getTableView().getItems().get(t.getTablePosition().getRow()).setName(t.getNewValue());
+            } else {
+                t.getTableView().getItems().remove(t.getTablePosition().getRow());
+            }
+        });
+        first.setCellValueFactory(new PropertyValueFactory<Item, Integer>("quantity"));
         first.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
-        first.setOnEditCommit((EventHandler<TableColumn.CellEditEvent<Item, Integer>>) t ->
-                t.getTableView().getItems().get(t.getTablePosition().getRow()).setQuantity(t.getNewValue()));
-        table.getColumns().addAll(second,first);
+        first.setOnEditCommit((EventHandler<TableColumn.CellEditEvent<Item, Integer>>) t ->{
+                if(t.getNewValue() > 0){
+                    t.getTableView().getItems().get(t.getTablePosition().getRow()).setQuantity(t.getNewValue());
+                } else {
+                    t.getTableView().getItems().remove(t.getTablePosition().getRow());
+                }
+        });
+        table.getColumns().addAll(second, first);
         table.setItems(data);
         VBox vbox = new VBox();
         vbox.setSpacing(5);
@@ -84,7 +94,7 @@ public class Main extends Application {
         return vbox;
     }
 
-    private HBox setBottom(){
+    private HBox setBottom() {
         final TextField addItem = new TextField();
         addItem.setPromptText("What to add to list?");
         final TextField addQuantity = new TextField();
@@ -95,18 +105,19 @@ public class Main extends Application {
         addButton.setOnAction(e -> {
             int quantity = 0;
             try {
-                 quantity = Integer.parseInt(addQuantity.getText());
-            } catch (RuntimeException ex){
+                quantity = Integer.parseInt(addQuantity.getText());
+            } catch (RuntimeException ex) {
                 System.out.println(ex.getMessage());
             }
-            if(addItem.getText().length() > 0){
-                data.add(new Item(addItem.getText(),quantity));
+            if (addItem.getText().length() > 0) {
+                data.add(new Item(addItem.getText(), quantity));
             }
             addItem.clear();
             addQuantity.clear();
 
         });
-        HBox hBox = new HBox(addItem,addQuantity,addButton);
+        addButton.setDefaultButton(true);
+        HBox hBox = new HBox(addItem, addQuantity, addButton);
         hBox.setPadding(new Insets(0, 20, 20, 50));
         hBox.setSpacing(3);
         return hBox;

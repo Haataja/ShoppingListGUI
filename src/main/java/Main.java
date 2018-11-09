@@ -8,6 +8,7 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -15,8 +16,7 @@ import javafx.scene.text.Font;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-
-
+import javafx.util.converter.IntegerStringConverter;
 
 
 public class Main extends Application {
@@ -68,7 +68,13 @@ public class Main extends Application {
         TableColumn first = new TableColumn("Quantity");
         TableColumn second = new TableColumn("Item");
         second.setCellValueFactory(new PropertyValueFactory<Item,String>("name"));
+        second.setCellFactory(TextFieldTableCell.forTableColumn());
+        second.setOnEditCommit((EventHandler<TableColumn.CellEditEvent<Item, String>>) t ->
+                t.getTableView().getItems().get(t.getTablePosition().getRow()).setName(t.getNewValue()));
         first.setCellValueFactory(new PropertyValueFactory<Item,Integer>("quantity"));
+        first.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
+        first.setOnEditCommit((EventHandler<TableColumn.CellEditEvent<Item, Integer>>) t ->
+                t.getTableView().getItems().get(t.getTablePosition().getRow()).setQuantity(t.getNewValue()));
         table.getColumns().addAll(second,first);
         table.setItems(data);
         VBox vbox = new VBox();
@@ -76,7 +82,7 @@ public class Main extends Application {
         vbox.setPadding(new Insets(10, 20, 0, 50));
         vbox.getChildren().addAll(label, table);
         return vbox;
-    }//lastNameCol.setCellValueFactory(new PropertyValueFactory<Person, String>("lastName"));
+    }
 
     private HBox setBottom(){
         final TextField addItem = new TextField();

@@ -29,6 +29,7 @@ public class Main extends Application {
             FXCollections.observableArrayList();
 
     public static void main(String[] args) {
+        System.out.println("Author: Hanna Haataja");
         launch(args);
     }
 

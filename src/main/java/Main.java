@@ -29,7 +29,7 @@ import java.nio.file.Paths;
 
 
 public class Main extends Application {
-    Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
+    private Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
     private BorderPane group;
     private Scene scene;
     private int width = Math.round((float) primaryScreenBounds.getWidth() / 3);
@@ -99,6 +99,7 @@ public class Main extends Application {
         dialog.showAndWait();
     }
 
+    @SuppressWarnings("unchecked")
     private VBox setTable() {
         Label label = new Label("SHOPPING LIST");
         label.setFont(new Font("Arial", 15));
@@ -147,7 +148,7 @@ public class Main extends Application {
             try {
                 quantity = Integer.parseInt(addQuantity.getText());
             } catch (RuntimeException ex) {
-                System.out.println(ex.getMessage());
+                System.out.println("Error while parsing quantity text box, " + ex.getMessage());
             }
             if (addItem.getText().length() > 0) {
                 data.add(new Item(addItem.getText(), quantity));
@@ -183,7 +184,7 @@ public class Main extends Application {
                 fileWriter.write(object.toJsonString());
                 fileWriter.close();
             } catch (IOException ex) {
-                System.out.println(ex.getMessage());
+                System.out.println("Error while saving to file, " + ex.getMessage());
             }
         }
     }
@@ -193,9 +194,8 @@ public class Main extends Application {
         fileChooser.setTitle("Open Shopping list");
         fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("JSON", "*.json"));
         File file = fileChooser.showOpenDialog(stage);
-        String text = "";
         try{
-            text = new String(Files.readAllBytes(Paths.get(file.getAbsolutePath())));
+            String text = new String(Files.readAllBytes(Paths.get(file.getAbsolutePath())));
             Parser parser = new Parser();
             JSONObject object = parser.parse(text);
             JSONArray array = (JSONArray)object.get("list");
@@ -204,7 +204,7 @@ public class Main extends Application {
                 data.add(new Item(listItem.get("item").toString(),(int)listItem.get("quantity")));
             }
         } catch (IOException ex) {
-            System.out.println(ex.getMessage());
+            System.out.println("Error while reading from file, " + ex.getMessage());
         }
     }
 }

@@ -1,6 +1,7 @@
-import fi.tamk.tiko.JSONArray;
-import fi.tamk.tiko.JSONObject;
+
 import fi.tamk.tiko.read.Parser;
+import fi.tamk.tiko.write.JSONArray;
+import fi.tamk.tiko.write.JSONObject;
 import javafx.scene.control.Alert;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;

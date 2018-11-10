@@ -1,6 +1,4 @@
-import fi.tamk.tiko.JSONArray;
-import fi.tamk.tiko.JSONObject;
-import fi.tamk.tiko.read.Parser;
+
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -15,17 +13,10 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
-import javafx.stage.FileChooser;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.converter.IntegerStringConverter;
-
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 
 public class Main extends Application {
@@ -68,35 +59,27 @@ public class Main extends Application {
         Menu file = new Menu("File");
         Menu save = new Menu("Save");
         MenuItem toFile = new MenuItem("to file");
-        toFile.setOnAction(e -> setSaveToFileDialog());
+        toFile.setOnAction(e -> Dialogs.setSaveToFileDialog(data, stage));
         MenuItem toDropBox = new MenuItem("to Dropbox");
         MenuItem toH2 = new MenuItem("to H2-database");
         save.getItems().addAll(toFile, toDropBox, toH2);
         Menu open = new Menu("Open");
         MenuItem fromFile = new MenuItem("from file");
-        fromFile.setOnAction(e -> setReadFromFileDialog());
+        fromFile.setOnAction(e -> Dialogs.setReadFromFileDialog(data, stage));
         MenuItem fromDropBox = new MenuItem("from Dropbox");
         MenuItem fromH2 = new MenuItem("from H2-database");
-        open.getItems().addAll(fromFile,fromDropBox,fromH2);
+        open.getItems().addAll(fromFile, fromDropBox, fromH2);
         file.getItems().addAll(save, open);
 
         Menu about = new Menu("About");
         MenuItem help = new MenuItem("Help");
         SeparatorMenuItem separator = new SeparatorMenuItem();
         MenuItem info = new MenuItem("Info");
-        info.setOnAction(event -> setDialog());
-        about.getItems().addAll(help,separator,info);
-        menu.getMenus().addAll(file,about);
+        info.setOnAction(event -> Dialogs.setCopyrightDialog());
+        about.getItems().addAll(help, separator, info);
+        menu.getMenus().addAll(file, about);
 
         return menu;
-    }
-
-    private void setDialog() {
-        Alert dialog = new Alert(Alert.AlertType.INFORMATION);
-        dialog.setTitle("Shopping list app");
-        dialog.setHeaderText(null);
-        dialog.setContentText("Copyright Hanna Haataja 2018");
-        dialog.showAndWait();
     }
 
     @SuppressWarnings("unchecked")
@@ -119,12 +102,12 @@ public class Main extends Application {
         });
         first.setCellValueFactory(new PropertyValueFactory<Item, Integer>("quantity"));
         first.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
-        first.setOnEditCommit((EventHandler<TableColumn.CellEditEvent<Item, Integer>>) t ->{
-                if(t.getNewValue() > 0){
-                    t.getTableView().getItems().get(t.getTablePosition().getRow()).setQuantity(t.getNewValue());
-                } else {
-                    t.getTableView().getItems().remove(t.getTablePosition().getRow());
-                }
+        first.setOnEditCommit((EventHandler<TableColumn.CellEditEvent<Item, Integer>>) t -> {
+            if (t.getNewValue() > 0) {
+                t.getTableView().getItems().get(t.getTablePosition().getRow()).setQuantity(t.getNewValue());
+            } else {
+                t.getTableView().getItems().remove(t.getTablePosition().getRow());
+            }
         });
         table.getColumns().addAll(second, first);
         table.setItems(data);
@@ -162,49 +145,5 @@ public class Main extends Application {
         hBox.setPadding(new Insets(0, 20, 20, 50));
         hBox.setSpacing(3);
         return hBox;
-    }
-
-    private void setSaveToFileDialog() {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Save Shopping list");
-        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("JSON", "*.json"));
-        File file = fileChooser.showSaveDialog(stage);
-        if (file != null) {
-            try {
-                JSONObject object = new JSONObject();
-                JSONArray array = new JSONArray();
-                for(Item item:data){
-                    JSONObject jsonItem = new JSONObject();
-                    jsonItem.put("item",item.getName());
-                    jsonItem.put("quantity", item.getQuantity());
-                    array.add(jsonItem);
-                }
-                object.put("list",array);
-                FileWriter fileWriter = new FileWriter(file);
-                fileWriter.write(object.toJsonString());
-                fileWriter.close();
-            } catch (IOException ex) {
-                System.out.println("Error while saving to file, " + ex.getMessage());
-            }
-        }
-    }
-
-    private void setReadFromFileDialog() {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Open Shopping list");
-        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("JSON", "*.json"));
-        File file = fileChooser.showOpenDialog(stage);
-        try{
-            String text = new String(Files.readAllBytes(Paths.get(file.getAbsolutePath())));
-            Parser parser = new Parser();
-            JSONObject object = parser.parse(text);
-            JSONArray array = (JSONArray)object.get("list");
-            for(int i = 0 ; i < array.length(); i++){
-                JSONObject listItem = (JSONObject) array.get(i);
-                data.add(new Item(listItem.get("item").toString(),(int)listItem.get("quantity")));
-            }
-        } catch (IOException ex) {
-            System.out.println("Error while reading from file, " + ex.getMessage());
-        }
     }
 }

@@ -1,5 +1,6 @@
 import fi.tamk.tiko.JSONArray;
 import fi.tamk.tiko.JSONObject;
+import fi.tamk.tiko.read.Parser;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -23,6 +24,8 @@ import javafx.util.converter.IntegerStringConverter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 
 public class Main extends Application {
@@ -71,6 +74,7 @@ public class Main extends Application {
         save.getItems().addAll(toFile, toDropBox, toH2);
         Menu open = new Menu("Open");
         MenuItem fromFile = new MenuItem("from file");
+        fromFile.setOnAction(e -> setReadFromFileDialog());
         MenuItem fromDropBox = new MenuItem("from Dropbox");
         MenuItem fromH2 = new MenuItem("from H2-database");
         open.getItems().addAll(fromFile,fromDropBox,fromH2);
@@ -181,6 +185,26 @@ public class Main extends Application {
             } catch (IOException ex) {
                 System.out.println(ex.getMessage());
             }
+        }
+    }
+
+    private void setReadFromFileDialog() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Open Shopping list");
+        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("JSON", "*.json"));
+        File file = fileChooser.showOpenDialog(stage);
+        String text = "";
+        try{
+            text = new String(Files.readAllBytes(Paths.get(file.getAbsolutePath())));
+            Parser parser = new Parser();
+            JSONObject object = parser.parse(text);
+            JSONArray array = (JSONArray)object.get("list");
+            for(int i = 0 ; i < array.length(); i++){
+                JSONObject listItem = (JSONObject) array.get(i);
+                data.add(new Item(listItem.get("item").toString(),(int)listItem.get("quantity")));
+            }
+        } catch (IOException ex) {
+            System.out.println(ex.getMessage());
         }
     }
 }

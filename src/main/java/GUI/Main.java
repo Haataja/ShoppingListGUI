@@ -21,7 +21,7 @@ import javafx.util.converter.IntegerStringConverter;
 
 /**
  * Main class of the project. Constructs the graphical user interface.
- * @author Hanna Haataja <hanna.haataja@cs.tamk.fi>
+ * @author Hanna Haataja, hanna.haataja@cs.tamk.fi
  * @version 1.0, 11/20/2018
  * @since 1.0
  */
@@ -45,6 +45,10 @@ public class Main extends Application {
         launch(args);
     }
 
+    /**
+     * Launches the graphical user interface.
+     * @param primaryStage the primary stage for this application, onto which the application scene can be set.
+     */
     @Override
     public void start(Stage primaryStage) {
         stage = primaryStage;

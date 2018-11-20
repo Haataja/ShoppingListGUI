@@ -2,7 +2,7 @@ package GUI;
 
 /**
  * Item is object used in the Shopping list as an list item.
- * @author Hanna Haataja <hanna.haataja@cs.tamk.fi>
+ * @author Hanna Haataja, hanna.haataja@cs.tamk.fi
  * @version 1.0, 11/20/2018
  * @since 1.0
  */

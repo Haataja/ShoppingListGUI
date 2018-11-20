@@ -1,3 +1,4 @@
+package GUI;
 
 import javafx.application.Application;
 import javafx.collections.FXCollections;
@@ -18,7 +19,12 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.converter.IntegerStringConverter;
 
-
+/**
+ * Main class of the project. Constructs the graphical user interface.
+ * @author Hanna Haataja <hanna.haataja@cs.tamk.fi>
+ * @version 1.0, 11/20/2018
+ * @since 1.0
+ */
 public class Main extends Application {
     private Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
     private BorderPane group;
@@ -30,6 +36,10 @@ public class Main extends Application {
             FXCollections.observableArrayList();
     private Stage stage;
 
+    /**
+     * Starts the program.
+     * @param args Inline arguments.
+     */
     public static void main(String[] args) {
         System.out.println("Author: Hanna Haataja");
         launch(args);
@@ -103,6 +113,7 @@ public class Main extends Application {
         first.setCellValueFactory(new PropertyValueFactory<Item, Integer>("quantity"));
         first.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
         first.setOnEditCommit((EventHandler<TableColumn.CellEditEvent<Item, Integer>>) t -> {
+            //TODO: ADD ERROR HANDLING QUANTITY = null
             if (t.getNewValue() > 0) {
                 t.getTableView().getItems().get(t.getTablePosition().getRow()).setQuantity(t.getNewValue());
             } else {
@@ -119,6 +130,7 @@ public class Main extends Application {
     }
 
     private HBox setBottom() {
+        // TODO: ADD REMOVE ALL BUTTON
         final TextField addItem = new TextField();
         addItem.setPromptText("What to add to list?");
         final TextField addQuantity = new TextField();

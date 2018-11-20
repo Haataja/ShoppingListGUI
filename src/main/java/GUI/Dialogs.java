@@ -1,3 +1,4 @@
+package GUI;
 
 import fi.tamk.tiko.read.Parser;
 import fi.tamk.tiko.write.JSONArray;
@@ -13,8 +14,17 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 
+/**
+ * Dialog class sets up different dialog boxes used in Main-class.
+ * @author Hanna Haataja <hanna.haataja@cs.tamk.fi>
+ * @version 1.0, 11/20/2018
+ * @since 1.0
+ */
 public class Dialogs {
 
+    /**
+     * Sets the information dialog to GUI.
+     */
     static void setCopyrightDialog() {
         Alert dialog = new Alert(Alert.AlertType.INFORMATION);
         dialog.setTitle("Shopping list app");
@@ -23,6 +33,14 @@ public class Dialogs {
         dialog.showAndWait();
     }
 
+    /**
+     * Sets the save file chooser to the GUI.
+     *
+     * Writes shopping list to selected file in JSON format.
+     *
+     * @param data List that holds items from the shopping list.
+     * @param stage Stage that shows the dialog.
+     */
     static void setSaveToFileDialog(List<Item> data, Stage stage) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Save Shopping list");
@@ -48,6 +66,15 @@ public class Dialogs {
         }
     }
 
+    /**
+     * Sets the read file chooser to GUI.
+     *
+     * Only .json-files can be chosen and reads the file and appends
+     * the content of the file to the {@link List} of items.
+     *
+     * @param data List that holds items from the shopping list.
+     * @param stage Stage that shows the dialog.
+     */
     static void setReadFromFileDialog(List<Item> data, Stage stage) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open Shopping list");

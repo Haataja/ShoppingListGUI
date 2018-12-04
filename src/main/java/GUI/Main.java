@@ -56,7 +56,7 @@ public class Main extends Application {
         group = new BorderPane();
         group.setTop(new HBox(setMenu()));
         group.setCenter(setTable());
-        group.setBottom(setBottom());
+        //group.setBottom();
         scene = new Scene(group, width, height);
         primaryStage.setScene(scene);
         primaryStage.initStyle(StageStyle.DECORATED);
@@ -75,6 +75,7 @@ public class Main extends Application {
         MenuItem toFile = new MenuItem("to file");
         toFile.setOnAction(e -> Dialogs.setSaveToFileDialog(data, stage));
         MenuItem toDropBox = new MenuItem("to Dropbox");
+        toDropBox.setOnAction(e -> Dialogs.setSaveToDropbox(this, data));
         MenuItem toH2 = new MenuItem("to H2-database");
         save.getItems().addAll(toFile, toDropBox, toH2);
         Menu open = new Menu("Open");
@@ -117,11 +118,17 @@ public class Main extends Application {
         first.setCellValueFactory(new PropertyValueFactory<Item, Integer>("quantity"));
         first.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
         first.setOnEditCommit((EventHandler<TableColumn.CellEditEvent<Item, Integer>>) t -> {
-            //TODO: ADD ERROR HANDLING QUANTITY = null
-            if (t.getNewValue() > 0) {
-                t.getTableView().getItems().get(t.getTablePosition().getRow()).setQuantity(t.getNewValue());
-            } else {
+            try {
+                if (t.getNewValue() > 0) {
+                    t.getTableView().getItems().get(t.getTablePosition().getRow()).setQuantity(t.getNewValue());
+                } else {
+                    t.getTableView().getItems().remove(t.getTablePosition().getRow());
+                }
+            }catch (NullPointerException e){
+                System.out.println("New value null -> remove row: " + e.getMessage() );
                 t.getTableView().getItems().remove(t.getTablePosition().getRow());
+            } catch (Exception ex){
+                System.out.println("Error while modifying the quantity, " + ex.getMessage());
             }
         });
         table.getColumns().addAll(second, first);
@@ -129,11 +136,11 @@ public class Main extends Application {
         VBox vbox = new VBox();
         vbox.setSpacing(5);
         vbox.setPadding(new Insets(10, 20, 0, 50));
-        vbox.getChildren().addAll(label, table);
+        vbox.getChildren().addAll(label, setAdding(),table);
         return vbox;
     }
 
-    private HBox setBottom() {
+    private HBox setAdding() {
         // TODO: ADD REMOVE ALL BUTTON
         final TextField addItem = new TextField();
         addItem.setPromptText("What to add to list?");
@@ -143,23 +150,26 @@ public class Main extends Application {
 
         final Button addButton = new Button("Add");
         addButton.setOnAction(e -> {
-            int quantity = 0;
-            try {
-                quantity = Integer.parseInt(addQuantity.getText());
-            } catch (RuntimeException ex) {
-                System.out.println("Error while parsing quantity text box, " + ex.getMessage());
+            if(addItem.getText().length() > 0){
+                int quantity = 0;
+                try {
+                    String text = addQuantity.getText().trim();
+                    quantity = Integer.parseInt(text);
+                } catch (RuntimeException ex) {
+                    System.out.println("Error while parsing quantity text box, " + ex.getMessage());
+                }
+                if (addItem.getText().length() > 0) {
+                    data.add(new Item(addItem.getText(), quantity));
+                }
+                addItem.clear();
+                addQuantity.clear();
             }
-            if (addItem.getText().length() > 0) {
-                data.add(new Item(addItem.getText(), quantity));
-            }
-            addItem.clear();
-            addQuantity.clear();
 
         });
         addButton.setDefaultButton(true);
         HBox hBox = new HBox(addItem, addQuantity, addButton);
-        hBox.setPadding(new Insets(0, 20, 20, 50));
-        hBox.setSpacing(3);
+        //hBox.setPadding(new Insets(0, 20, 20, 50));
+        hBox.setSpacing(5);
         return hBox;
     }
 }

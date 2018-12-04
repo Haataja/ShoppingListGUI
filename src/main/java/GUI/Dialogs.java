@@ -1,21 +1,32 @@
 package GUI;
 
+import GUI.dropbox.DropboxHelper;
 import fi.tamk.tiko.read.Parser;
 import fi.tamk.tiko.write.JSONArray;
 import fi.tamk.tiko.write.JSONObject;
-import javafx.scene.control.Alert;
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.geometry.Insets;
+import javafx.scene.Node;
+import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.util.Pair;
 
+import javax.swing.text.html.Option;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Dialog class sets up different dialog boxes used in Main-class.
+ *
  * @author Hanna Haataja, hanna.haataja@cs.tamk.fi
  * @version 1.0, 11/20/2018
  * @since 1.0
@@ -35,10 +46,10 @@ public class Dialogs {
 
     /**
      * Sets the save file chooser to the GUI.
-     *
+     * <p>
      * Writes shopping list to selected file in JSON format.
      *
-     * @param data List that holds items from the shopping list.
+     * @param data  List that holds items from the shopping list.
      * @param stage Stage that shows the dialog.
      */
     static void setSaveToFileDialog(List<Item> data, Stage stage) {
@@ -47,32 +58,31 @@ public class Dialogs {
         fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("JSON", "*.json"));
         File file = fileChooser.showSaveDialog(stage);
         if (file != null) {
-            try {
-                JSONObject object = new JSONObject();
-                JSONArray array = new JSONArray();
-                for (Item item : data) {
-                    JSONObject jsonItem = new JSONObject();
-                    jsonItem.put("item", item.getName());
-                    jsonItem.put("quantity", item.getQuantity());
-                    array.add(jsonItem);
-                }
-                object.put("list", array);
-                FileWriter fileWriter = new FileWriter(file);
-                fileWriter.write(object.toJsonString());
-                fileWriter.close();
-            } catch (IOException ex) {
-                System.out.println("Error while saving to file, " + ex.getMessage());
+            if (writeFile(data, file)) {
+                setSuccessDialog(file);
             }
         }
+
+    }
+
+    /**
+     * Sets the information dialog about successful saving to GUI.
+     */
+    static void setSuccessDialog(File file) {
+        Alert dialog = new Alert(Alert.AlertType.INFORMATION);
+        dialog.setTitle("Save succeed!");
+        dialog.setHeaderText(null);
+        dialog.setContentText("Save done: " + file.getName());
+        dialog.showAndWait();
     }
 
     /**
      * Sets the read file chooser to GUI.
-     *
+     * <p>
      * Only .json-files can be chosen and reads the file and appends
      * the content of the file to the {@link List} of items.
      *
-     * @param data List that holds items from the shopping list.
+     * @param data  List that holds items from the shopping list.
      * @param stage Stage that shows the dialog.
      */
     static void setReadFromFileDialog(List<Item> data, Stage stage) {
@@ -92,5 +102,88 @@ public class Dialogs {
         } catch (IOException ex) {
             System.out.println("Error while reading from file, " + ex.getMessage());
         }
+    }
+
+    public static void setSaveToDropbox(Application application, List<Item> data) {
+        Dialog<Pair<String, String>> dialog = new Dialog<>();
+        dialog.setTitle("Save to Dropbox");
+        String url = DropboxHelper.init();
+
+        ButtonType ok = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+        ButtonType link = new ButtonType("Open Dropbox", ButtonBar.ButtonData.FINISH);
+        dialog.getDialogPane().getButtonTypes().addAll(ok, ButtonType.CANCEL, link);
+
+        dialog.getDialogPane().addEventFilter(ActionEvent.ACTION, e -> {
+            if (e.getTarget().toString().contains("Open Dropbox")) {
+                e.consume();
+                application.getHostServices().showDocument(url);
+            }
+        });
+
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 150, 10, 10));
+
+        TextField fileNameField = new TextField();
+        fileNameField.setPromptText("example.json");
+        TextField tokenField = new TextField();
+        tokenField.setPromptText("Dropbox code");
+
+        grid.add(new Label("File name:"), 0, 0);
+        grid.add(fileNameField, 1, 0);
+        grid.add(new Label("Dropbox code:"), 0, 1);
+        grid.add(tokenField, 1, 1);
+
+        Node loginButton = dialog.getDialogPane().lookupButton(ok);
+        loginButton.setDisable(true);
+
+        fileNameField.textProperty().addListener((observable, oldValue, newValue) -> loginButton.setDisable(newValue.trim().isEmpty()));
+        dialog.getDialogPane().setContent(grid);
+
+        //Platform.runLater(fileNameField::requestFocus);
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == ok) {
+                return new Pair<>(fileNameField.getText(), tokenField.getText().trim());
+            }
+            return null;
+        });
+
+
+        Optional<Pair<String, String>> result = dialog.showAndWait();
+
+        if (result.isPresent()) {
+            String filename = result.get().getKey();
+            String token = result.get().getValue();
+
+            File inputFile = new File("src/main/resources/" + filename);
+            if (writeFile(data, inputFile)) {
+                DropboxHelper.uploadToDropbox(token, inputFile);
+            }
+        }
+
+    }
+
+    private static boolean writeFile(List<Item> data, File inputFile) {
+        try {
+            JSONObject object = new JSONObject();
+            JSONArray array = new JSONArray();
+            for (Item item : data) {
+                JSONObject jsonItem = new JSONObject();
+                jsonItem.put("item", item.getName());
+                jsonItem.put("quantity", item.getQuantity());
+                array.add(jsonItem);
+            }
+            object.put("list", array);
+            FileWriter fileWriter = new FileWriter(inputFile);
+            fileWriter.write(object.toJsonString());
+            fileWriter.close();
+            return true;
+        } catch (IOException ex) {
+            System.out.println("Error while saving to file, " + ex.getMessage());
+        }
+        return false;
     }
 }

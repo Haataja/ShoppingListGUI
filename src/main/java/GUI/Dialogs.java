@@ -14,6 +14,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 
+import javax.swing.plaf.PanelUI;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -164,7 +165,9 @@ public class Dialogs {
 
             File inputFile = new File("src/main/resources/" + filename);
             if (writeFile(data, inputFile)) {
-                DropboxHelper.uploadToDropbox(token, inputFile);
+                if(DropboxHelper.uploadToDropbox(token, inputFile)){
+                    setSuccessDialog(inputFile);
+                }
             }
         }
 
@@ -265,5 +268,13 @@ public class Dialogs {
 
         }
 
+    }
+
+    public static void setTakeWhile(){
+        Alert dialog = new Alert(Alert.AlertType.INFORMATION);
+        dialog.setTitle("Downloading");
+        dialog.setHeaderText(null);
+        dialog.setContentText("Getting your file, this may take a while.");
+        dialog.showAndWait();
     }
 }

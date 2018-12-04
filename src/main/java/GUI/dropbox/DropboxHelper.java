@@ -1,5 +1,6 @@
 package GUI.dropbox;
 
+import GUI.Dialogs;
 import com.dropbox.core.DbxAppInfo;
 import com.dropbox.core.DbxAuthFinish;
 import com.dropbox.core.DbxRequestConfig;
@@ -65,12 +66,14 @@ public class DropboxHelper {
      * @param authToken authToken for getting the client.
      * @param inputFile File that is uploaded.
      */
-    public static void uploadToDropbox(String authToken, File inputFile) {
+    public static boolean uploadToDropbox(String authToken, File inputFile) {
         try (InputStream input = new FileInputStream(inputFile)) {
             getClient(authToken).files().uploadBuilder("/" + inputFile.getName()).uploadAndFinish(input);
+            return true;
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return false;
     }
 
     /**
@@ -86,6 +89,7 @@ public class DropboxHelper {
             InputStream in = getClient(authToken).files().download("/" + name).getInputStream();
             String result = new BufferedReader(new InputStreamReader(in))
                     .lines().collect(Collectors.joining(System.lineSeparator()));
+            Dialogs.setTakeWhile();
             return result;
 
         } catch (Exception e) {

@@ -22,7 +22,7 @@ import javafx.util.converter.IntegerStringConverter;
 /**
  * Main class of the project. Constructs the graphical user interface.
  * @author Hanna Haataja, hanna.haataja@cs.tamk.fi
- * @version 1.0, 11/20/2018
+ * @version 2.0, 12/04/2018
  * @since 1.0
  */
 public class Main extends Application {
@@ -56,7 +56,7 @@ public class Main extends Application {
         group = new BorderPane();
         group.setTop(new HBox(setMenu()));
         group.setCenter(setTable());
-        //group.setBottom();
+        group.setBottom(setBottom());
         scene = new Scene(group, width, height);
         primaryStage.setScene(scene);
         primaryStage.initStyle(StageStyle.DECORATED);
@@ -82,6 +82,7 @@ public class Main extends Application {
         MenuItem fromFile = new MenuItem("from file");
         fromFile.setOnAction(e -> Dialogs.setReadFromFileDialog(data, stage));
         MenuItem fromDropBox = new MenuItem("from Dropbox");
+        fromDropBox.setOnAction(e -> Dialogs.setLoadFromDropbox(this, data));
         MenuItem fromH2 = new MenuItem("from H2-database");
         open.getItems().addAll(fromFile, fromDropBox, fromH2);
         file.getItems().addAll(save, open);
@@ -141,7 +142,6 @@ public class Main extends Application {
     }
 
     private HBox setAdding() {
-        // TODO: ADD REMOVE ALL BUTTON
         final TextField addItem = new TextField();
         addItem.setPromptText("What to add to list?");
         final TextField addQuantity = new TextField();
@@ -170,6 +170,16 @@ public class Main extends Application {
         HBox hBox = new HBox(addItem, addQuantity, addButton);
         //hBox.setPadding(new Insets(0, 20, 20, 50));
         hBox.setSpacing(5);
+        return hBox;
+    }
+
+    private HBox setBottom(){
+        final Button clear = new Button("Clear list");
+        clear.setPrefWidth(100);
+        clear.setOnAction(e -> data.clear());
+        HBox hBox = new HBox(clear);
+
+        hBox.setPadding(new Insets(5, 20, 20, 350));
         return hBox;
     }
 }

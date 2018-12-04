@@ -5,7 +5,6 @@ import fi.tamk.tiko.read.Parser;
 import fi.tamk.tiko.write.JSONArray;
 import fi.tamk.tiko.write.JSONObject;
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
@@ -15,7 +14,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 
-import javax.swing.text.html.Option;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -28,7 +26,7 @@ import java.util.Optional;
  * Dialog class sets up different dialog boxes used in Main-class.
  *
  * @author Hanna Haataja, hanna.haataja@cs.tamk.fi
- * @version 1.0, 11/20/2018
+ * @version 2.0, 12/04/2018
  * @since 1.0
  */
 public class Dialogs {
@@ -104,6 +102,12 @@ public class Dialogs {
         }
     }
 
+    /**
+     * Saves the current list to Dropbox by always asking the token.
+     *
+     * @param application Application is needed to open browser window.
+     * @param data        List of the items saved.
+     */
     public static void setSaveToDropbox(Application application, List<Item> data) {
         Dialog<Pair<String, String>> dialog = new Dialog<>();
         dialog.setTitle("Save to Dropbox");
@@ -185,5 +189,81 @@ public class Dialogs {
             System.out.println("Error while saving to file, " + ex.getMessage());
         }
         return false;
+    }
+
+    /**
+     * Loads file from the Dropbox by the file name and token.
+     *
+     * @param application Application is needed to open browser window.
+     * @param data        The list the content of the file is appended.
+     */
+    public static void setLoadFromDropbox(Application application, List<Item> data) {
+        Dialog<Pair<String, String>> dialog = new Dialog<>();
+        dialog.setTitle("Load Dropbox");
+        String url = DropboxHelper.init();
+
+        ButtonType ok = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+        ButtonType link = new ButtonType("Open Dropbox", ButtonBar.ButtonData.FINISH);
+        dialog.getDialogPane().getButtonTypes().addAll(ok, ButtonType.CANCEL, link);
+
+        dialog.getDialogPane().addEventFilter(ActionEvent.ACTION, e -> {
+            if (e.getTarget().toString().contains("Open Dropbox")) {
+                e.consume();
+                application.getHostServices().showDocument(url);
+            }
+        });
+
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 150, 10, 10));
+
+        TextField fileNameField = new TextField();
+        fileNameField.setPromptText("example.json");
+        TextField tokenField = new TextField();
+        tokenField.setPromptText("Dropbox code");
+
+        grid.add(new Label("File name:"), 0, 0);
+        grid.add(fileNameField, 1, 0);
+        grid.add(new Label("Dropbox code:"), 0, 1);
+        grid.add(tokenField, 1, 1);
+
+        Node loginButton = dialog.getDialogPane().lookupButton(ok);
+        loginButton.setDisable(true);
+
+        fileNameField.textProperty().addListener((observable, oldValue, newValue) -> loginButton.setDisable(newValue.trim().isEmpty()));
+        dialog.getDialogPane().setContent(grid);
+
+        //Platform.runLater(fileNameField::requestFocus);
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == ok) {
+                return new Pair<>(fileNameField.getText(), tokenField.getText().trim());
+            }
+            return null;
+        });
+
+
+        Optional<Pair<String, String>> result = dialog.showAndWait();
+
+        if (result.isPresent()) {
+            String filename = result.get().getKey();
+            String token = result.get().getValue();
+
+
+            String text = DropboxHelper.loadFromDropbox(token, filename);
+            Parser parser = new Parser();
+            if (text != null) {
+                JSONObject object = parser.parse(text);
+                JSONArray array = (JSONArray) object.get("list");
+                for (int i = 0; i < array.length(); i++) {
+                    JSONObject listItem = (JSONObject) array.get(i);
+                    data.add(new Item(listItem.get("item").toString(), (int) listItem.get("quantity")));
+                }
+            }
+
+        }
+
     }
 }

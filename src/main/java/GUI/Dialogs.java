@@ -1,5 +1,6 @@
 package GUI;
 
+import GUI.database.ConnectionHelper;
 import GUI.dropbox.DropboxHelper;
 import fi.tamk.tiko.read.Parser;
 import fi.tamk.tiko.write.JSONArray;
@@ -66,7 +67,7 @@ public class Dialogs {
     /**
      * Sets the information dialog about successful saving to GUI.
      */
-    static void setSuccessDialog(File file) {
+    private static void setSuccessDialog(File file) {
         Alert dialog = new Alert(Alert.AlertType.INFORMATION);
         dialog.setTitle("Save succeed!");
         dialog.setHeaderText(null);
@@ -269,11 +270,31 @@ public class Dialogs {
 
     }
 
+    /**
+     * Sets dialog that tells files downloaded from Dropbox may take a while.
+     */
     public static void setTakeWhile(){
         Alert dialog = new Alert(Alert.AlertType.INFORMATION);
         dialog.setTitle("Downloading");
         dialog.setHeaderText(null);
         dialog.setContentText("Getting your file, this may take a while.");
+        dialog.showAndWait();
+    }
+
+    public static void setSaveToH2(List<ShoppingList> data){
+        ConnectionHelper helper = new ConnectionHelper();
+        try{
+            helper.connect();
+            helper.writeToDatabase(data);
+        } catch (Error e){
+            e.printStackTrace();
+        } finally {
+            helper.close();
+        }
+        Alert dialog = new Alert(Alert.AlertType.INFORMATION);
+        dialog.setTitle("Save succeed!");
+        dialog.setHeaderText(null);
+        dialog.setContentText("Saved to H2!\ndatabase: \"ShoppingList\", \nTable: \"ShoppingList\"");
         dialog.showAndWait();
     }
 }

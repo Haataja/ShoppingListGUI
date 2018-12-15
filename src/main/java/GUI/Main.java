@@ -77,6 +77,7 @@ public class Main extends Application {
         MenuItem toDropBox = new MenuItem("to Dropbox");
         toDropBox.setOnAction(e -> Dialogs.setSaveToDropbox(this, data));
         MenuItem toH2 = new MenuItem("to H2-database");
+        toH2.setOnAction(e -> Dialogs.setSaveToH2(data));
         save.getItems().addAll(toFile, toDropBox, toH2);
         Menu open = new Menu("Open");
         MenuItem fromFile = new MenuItem("from file");

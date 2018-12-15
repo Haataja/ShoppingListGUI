@@ -31,7 +31,7 @@ import java.util.Optional;
  * Dialog class sets up different dialog boxes used in Main-class.
  *
  * @author Hanna Haataja, hanna.haataja@cs.tamk.fi
- * @version 2.0, 12/04/2018
+ * @version 3.0, 12/15/2018
  * @since 1.0
  */
 public class Dialogs {
@@ -158,10 +158,13 @@ public class Dialogs {
         fileNameField.textProperty().addListener((observable, oldValue, newValue) -> loginButton.setDisable(newValue.trim().isEmpty()));
         dialog.getDialogPane().setContent(new HBox(grid, new ImageView(new Image(Dialogs.class.getClassLoader().getResourceAsStream("images/dropbox.png")))));
 
-        //Platform.runLater(fileNameField::requestFocus);
+        Platform.runLater(fileNameField::requestFocus);
 
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == ok) {
+                if(!fileNameField.getText().contains(".json")){
+                    fileNameField.setText(fileNameField.getText() + ".json");
+                }
                 return new Pair<>(fileNameField.getText(), tokenField.getText().trim());
             }
             return null;
@@ -254,6 +257,9 @@ public class Dialogs {
 
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == ok) {
+                if(!fileNameField.getText().contains(".json")){
+                    fileNameField.setText(fileNameField.getText() + ".json");
+                }
                 return new Pair<>(fileNameField.getText(), tokenField.getText().trim());
             }
             return null;
@@ -295,31 +301,61 @@ public class Dialogs {
         dialog.showAndWait();
     }
 
+    /**
+     * Sets all the dialogs that relate to saving to H2 database.
+     * @param data List of items in the shopping list.
+     */
     public static void setSaveToH2(List<ShoppingList> data) {
-        ConnectionHelper helper = new ConnectionHelper();
-        try {
-            helper.connect();
-            helper.writeToDatabase(data);
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        Stage dialogStage = (Stage) alert.getDialogPane().getScene().getWindow();
+        dialogStage.getIcons().add(new Image(Dialogs.class.getClassLoader().getResourceAsStream("images/open.png")));
+        alert.setTitle("Save to H2 database");
+        alert.setHeaderText("This will automatically save to your H2 database.");
+        alert.setContentText("Database info:\nDatabase: \"~/ShoppingList\", \nTable: \"ShoppingList\"\n" +
+                "User name: sa \nPassword: (empty)\nthis will be created if one does not exist.");
 
-            Alert dialog = new Alert(Alert.AlertType.INFORMATION);
-            dialog.setTitle("Save succeed!");
-            dialog.setHeaderText(null);
-            dialog.setContentText("Saved to H2!\nDatabase: \"~/ShoppingList\", \nTable: \"ShoppingList\"");
-            dialog.showAndWait();
-        } catch (Exception e) {
-            System.out.println("Error while handling H2 database!");
-            //e.printStackTrace();
-            setErrorH2("There was an error your shopping list is not saved.");
-        } finally {
-            helper.close();
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK){
+            ConnectionHelper helper = new ConnectionHelper();
+            try {
+                helper.connect();
+                helper.writeToDatabase(data);
+
+                Alert dialog = new Alert(Alert.AlertType.INFORMATION);
+                Stage dialogStage1 = (Stage) dialog.getDialogPane().getScene().getWindow();
+                dialogStage1.getIcons().add(new Image(Dialogs.class.getClassLoader().getResourceAsStream("images/open.png")));
+                dialog.setTitle("Save succeed!");
+                dialog.setHeaderText(null);
+                dialog.setContentText("Saved to H2!\nDatabase: \"~/ShoppingList\", \nTable: \"ShoppingList\"" +
+                        "\nUser name: sa \nPassword: (empty)");
+                dialog.showAndWait();
+            } catch (Exception e) {
+                System.out.println("Error while handling H2 database!");
+                //e.printStackTrace();
+                setErrorH2("There was an error your shopping list is not saved.");
+            } finally {
+                helper.close();
+            }
         }
+
     }
 
+    /**
+     * Sets all the dialogs that relate to loading from H2 database.
+     * @param data List of items in the shopping list.
+     */
     public static void setReadFromH2(List<ShoppingList> data) {
         ConnectionHelper helper = new ConnectionHelper();
         try {
             helper.connect();
             helper.readFromDatabase(data);
+            Alert dialog = new Alert(Alert.AlertType.INFORMATION);
+            Stage dialogStage = (Stage) dialog.getDialogPane().getScene().getWindow();
+            dialogStage.getIcons().add(new Image(Dialogs.class.getClassLoader().getResourceAsStream("images/open.png")));
+            dialog.setTitle("Succeed!");
+            dialog.setHeaderText(null);
+            dialog.setContentText("Items loaded from H2 database.");
+            dialog.showAndWait();
         } catch (Exception e) {
             System.out.println("Error while handling H2 database!");
             e.printStackTrace();

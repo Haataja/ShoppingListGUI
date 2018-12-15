@@ -22,7 +22,7 @@ import javafx.util.converter.IntegerStringConverter;
 /**
  * Main class of the project. Constructs the graphical user interface.
  * @author Hanna Haataja, hanna.haataja@cs.tamk.fi
- * @version 2.0, 12/04/2018
+ * @version 3.0, 12/15/2018
  * @since 1.0
  */
 public class Main extends Application {

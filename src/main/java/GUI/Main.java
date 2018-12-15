@@ -85,6 +85,7 @@ public class Main extends Application {
         MenuItem fromDropBox = new MenuItem("from Dropbox");
         fromDropBox.setOnAction(e -> Dialogs.setLoadFromDropbox(this, data));
         MenuItem fromH2 = new MenuItem("from H2-database");
+        fromH2.setOnAction(e -> Dialogs.setReadFromH2(data));
         open.getItems().addAll(fromFile, fromDropBox, fromH2);
         file.getItems().addAll(save, open);
 
@@ -107,7 +108,7 @@ public class Main extends Application {
         table.setPrefHeight(0.8 * height);
         table.setEditable(true);
         TableColumn first = new TableColumn("Quantity");
-        TableColumn second = new TableColumn("ShoppingList");
+        TableColumn second = new TableColumn("Item");
         second.setCellValueFactory(new PropertyValueFactory<ShoppingList, String>("name"));
         second.setCellFactory(TextFieldTableCell.forTableColumn());
         second.setOnEditCommit((EventHandler<TableColumn.CellEditEvent<ShoppingList, String>>) t -> {

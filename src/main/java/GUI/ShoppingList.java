@@ -31,6 +31,10 @@ public class ShoppingList {
         setQuantity(quantity);
     }
 
+    public ShoppingList(){
+
+    }
+
     /**
      * Gets the quantity of the object.
      * @return int quantity.

@@ -295,16 +295,30 @@ public class Dialogs {
         } catch (Exception e){
             System.out.println("Error while handling H2 database!");
             //e.printStackTrace();
-            setErrorH2();
+            setErrorH2("There was an error your shopping list is not saved.");
         } finally {
             helper.close();
         }
     }
 
-    private static void setErrorH2(){
+    public static void setReadFromH2(List<ShoppingList> data){
+        ConnectionHelper helper = new ConnectionHelper();
+        try{
+            helper.connect();
+            helper.readFromDatabase(data);
+        } catch (Exception e){
+            System.out.println("Error while handling H2 database!");
+            e.printStackTrace();
+            setErrorH2("Cannot read from H2 database.");
+        } finally {
+            helper.close();
+        }
+    }
+
+    private static void setErrorH2(String message){
         Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Error While Writing to H2 Database");
-        alert.setHeaderText("There was an error your shopping list is not saved.");
+        alert.setTitle("Error While Handling H2 Database");
+        alert.setHeaderText(message);
         alert.setContentText("Before trying again try to:\nDisconnect other connections to database ~/shoppingList" +
                 "\nMake sure you get to database with credentials:\n\t\tUser name: sa, Password:(empty)");
 

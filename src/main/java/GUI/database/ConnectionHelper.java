@@ -33,6 +33,19 @@ public class ConnectionHelper {
         }
     }
 
+    public void readFromDatabase(List<ShoppingList> data){
+        boolean keepGoing= true;
+        int i = 1;
+        while (keepGoing){
+            if(session.get(ShoppingList.class,i) != null){
+                data.add(session.get(ShoppingList.class,i));
+            } else {
+                keepGoing = false;
+            }
+            i++;
+        }
+    }
+
     public Session getSession() {
         return session;
     }

@@ -75,6 +75,8 @@ public class Dialogs {
      */
     private static void setSuccessDialog(File file) {
         Alert dialog = new Alert(Alert.AlertType.INFORMATION);
+        Stage dialogStage = (Stage) dialog.getDialogPane().getScene().getWindow();
+        dialogStage.getIcons().add(new Image(Dialogs.class.getClassLoader().getResourceAsStream("images/open.png")));
         dialog.setTitle("Save succeed!");
         dialog.setHeaderText(null);
         dialog.setContentText("Save done: " + file.getName());

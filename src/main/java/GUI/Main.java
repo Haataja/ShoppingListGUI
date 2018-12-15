@@ -96,11 +96,9 @@ public class Main extends Application {
         file.getItems().addAll(save, open);
 
         Menu about = new Menu("About");
-        MenuItem help = new MenuItem("Help");
-        SeparatorMenuItem separator = new SeparatorMenuItem();
         MenuItem info = new MenuItem("Info");
         info.setOnAction(event -> Dialogs.setCopyrightDialog());
-        about.getItems().addAll(help, separator, info);
+        about.getItems().addAll(info);
         menu.getMenus().addAll(file, about);
         menu.setBackground(null);
         menu.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(1))));

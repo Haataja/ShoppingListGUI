@@ -11,14 +11,19 @@ public class ConnectionHelper {
     private Session session;
     private SessionFactory sessionFactory;
 
-    public void connect(){
+    public void connect() throws Exception{
         sessionFactory = buildSessionFactory();
         session = sessionFactory.openSession();
+        if(session == null){
+            throw new Exception("Connection error");
+        }
     }
 
     public void close(){
-        session.close();
-        sessionFactory.close();
+        if(session != null){
+            session.close();
+            sessionFactory.close();
+        }
     }
 
     public void writeToDatabase(List<ShoppingList> itemList){
@@ -45,11 +50,6 @@ public class ConnectionHelper {
     }
 
     private static SessionFactory buildSessionFactory(){
-        try{
-            return new Configuration().configure().addAnnotatedClass(ShoppingList.class).buildSessionFactory();
-        } catch (Error e){
-            e.printStackTrace();
-        }
-        return null;
+        return new Configuration().configure().addAnnotatedClass(ShoppingList.class).buildSessionFactory();
     }
 }

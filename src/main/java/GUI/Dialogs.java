@@ -286,15 +286,28 @@ public class Dialogs {
         try{
             helper.connect();
             helper.writeToDatabase(data);
-        } catch (Error e){
-            e.printStackTrace();
+
+            Alert dialog = new Alert(Alert.AlertType.INFORMATION);
+            dialog.setTitle("Save succeed!");
+            dialog.setHeaderText(null);
+            dialog.setContentText("Saved to H2!\nDatabase: \"~/ShoppingList\", \nTable: \"ShoppingList\"");
+            dialog.showAndWait();
+        } catch (Exception e){
+            System.out.println("Error while handling H2 database!");
+            //e.printStackTrace();
+            setErrorH2();
         } finally {
             helper.close();
         }
-        Alert dialog = new Alert(Alert.AlertType.INFORMATION);
-        dialog.setTitle("Save succeed!");
-        dialog.setHeaderText(null);
-        dialog.setContentText("Saved to H2!\ndatabase: \"ShoppingList\", \nTable: \"ShoppingList\"");
-        dialog.showAndWait();
+    }
+
+    private static void setErrorH2(){
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error While Writing to H2 Database");
+        alert.setHeaderText("There was an error your shopping list is not saved.");
+        alert.setContentText("Before trying again try to:\nDisconnect other connections to database ~/shoppingList" +
+                "\nMake sure you get to database with credentials:\n\t\tUser name: sa, Password:(empty)");
+
+        alert.showAndWait();
     }
 }

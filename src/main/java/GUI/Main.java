@@ -31,8 +31,8 @@ public class Main extends Application {
     private Scene scene;
     private int width = Math.round((float) primaryScreenBounds.getWidth() / 3);
     private int height = 640;
-    private TableView<Item> table;
-    private final ObservableList<Item> data =
+    private TableView<ShoppingList> table;
+    private final ObservableList<ShoppingList> data =
             FXCollections.observableArrayList();
     private Stage stage;
 
@@ -106,19 +106,19 @@ public class Main extends Application {
         table.setPrefHeight(0.8 * height);
         table.setEditable(true);
         TableColumn first = new TableColumn("Quantity");
-        TableColumn second = new TableColumn("Item");
-        second.setCellValueFactory(new PropertyValueFactory<Item, String>("name"));
+        TableColumn second = new TableColumn("ShoppingList");
+        second.setCellValueFactory(new PropertyValueFactory<ShoppingList, String>("name"));
         second.setCellFactory(TextFieldTableCell.forTableColumn());
-        second.setOnEditCommit((EventHandler<TableColumn.CellEditEvent<Item, String>>) t -> {
+        second.setOnEditCommit((EventHandler<TableColumn.CellEditEvent<ShoppingList, String>>) t -> {
             if (t.getNewValue().length() > 0) {
                 t.getTableView().getItems().get(t.getTablePosition().getRow()).setName(t.getNewValue());
             } else {
                 t.getTableView().getItems().remove(t.getTablePosition().getRow());
             }
         });
-        first.setCellValueFactory(new PropertyValueFactory<Item, Integer>("quantity"));
+        first.setCellValueFactory(new PropertyValueFactory<ShoppingList, Integer>("quantity"));
         first.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
-        first.setOnEditCommit((EventHandler<TableColumn.CellEditEvent<Item, Integer>>) t -> {
+        first.setOnEditCommit((EventHandler<TableColumn.CellEditEvent<ShoppingList, Integer>>) t -> {
             try {
                 if (t.getNewValue() > 0) {
                     t.getTableView().getItems().get(t.getTablePosition().getRow()).setQuantity(t.getNewValue());
@@ -159,7 +159,7 @@ public class Main extends Application {
                     System.out.println("Error while parsing quantity text box, " + ex.getMessage());
                 }
                 if (addItem.getText().length() > 0) {
-                    data.add(new Item(addItem.getText(), quantity));
+                    data.add(new ShoppingList(addItem.getText(), quantity));
                 }
                 addItem.clear();
                 addQuantity.clear();

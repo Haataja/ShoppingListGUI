@@ -14,7 +14,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 
-import javax.swing.plaf.PanelUI;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -51,7 +50,7 @@ public class Dialogs {
      * @param data  List that holds items from the shopping list.
      * @param stage Stage that shows the dialog.
      */
-    static void setSaveToFileDialog(List<Item> data, Stage stage) {
+    static void setSaveToFileDialog(List<ShoppingList> data, Stage stage) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Save Shopping list");
         fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("JSON", "*.json"));
@@ -84,7 +83,7 @@ public class Dialogs {
      * @param data  List that holds items from the shopping list.
      * @param stage Stage that shows the dialog.
      */
-    static void setReadFromFileDialog(List<Item> data, Stage stage) {
+    static void setReadFromFileDialog(List<ShoppingList> data, Stage stage) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open Shopping list");
         fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("JSON", "*.json"));
@@ -96,7 +95,7 @@ public class Dialogs {
             JSONArray array = (JSONArray) object.get("list");
             for (int i = 0; i < array.length(); i++) {
                 JSONObject listItem = (JSONObject) array.get(i);
-                data.add(new Item(listItem.get("item").toString(), (int) listItem.get("quantity")));
+                data.add(new ShoppingList(listItem.get("item").toString(), (int) listItem.get("quantity")));
             }
         } catch (IOException ex) {
             System.out.println("Error while reading from file, " + ex.getMessage());
@@ -109,7 +108,7 @@ public class Dialogs {
      * @param application Application is needed to open browser window.
      * @param data        List of the items saved.
      */
-    public static void setSaveToDropbox(Application application, List<Item> data) {
+    public static void setSaveToDropbox(Application application, List<ShoppingList> data) {
         Dialog<Pair<String, String>> dialog = new Dialog<>();
         dialog.setTitle("Save to Dropbox");
         String url = DropboxHelper.init();
@@ -163,7 +162,7 @@ public class Dialogs {
             String filename = result.get().getKey();
             String token = result.get().getValue();
 
-            File inputFile = new File("src/main/resources/" + filename);
+            File inputFile = new File(filename);
             if (writeFile(data, inputFile)) {
                 if(DropboxHelper.uploadToDropbox(token, inputFile)){
                     setSuccessDialog(inputFile);
@@ -173,11 +172,11 @@ public class Dialogs {
 
     }
 
-    private static boolean writeFile(List<Item> data, File inputFile) {
+    private static boolean writeFile(List<ShoppingList> data, File inputFile) {
         try {
             JSONObject object = new JSONObject();
             JSONArray array = new JSONArray();
-            for (Item item : data) {
+            for (ShoppingList item : data) {
                 JSONObject jsonItem = new JSONObject();
                 jsonItem.put("item", item.getName());
                 jsonItem.put("quantity", item.getQuantity());
@@ -200,7 +199,7 @@ public class Dialogs {
      * @param application Application is needed to open browser window.
      * @param data        The list the content of the file is appended.
      */
-    public static void setLoadFromDropbox(Application application, List<Item> data) {
+    public static void setLoadFromDropbox(Application application, List<ShoppingList> data) {
         Dialog<Pair<String, String>> dialog = new Dialog<>();
         dialog.setTitle("Load Dropbox");
         String url = DropboxHelper.init();
@@ -262,7 +261,7 @@ public class Dialogs {
                 JSONArray array = (JSONArray) object.get("list");
                 for (int i = 0; i < array.length(); i++) {
                     JSONObject listItem = (JSONObject) array.get(i);
-                    data.add(new Item(listItem.get("item").toString(), (int) listItem.get("quantity")));
+                    data.add(new ShoppingList(listItem.get("item").toString(), (int) listItem.get("quantity")));
                 }
             }
 

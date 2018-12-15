@@ -1,13 +1,24 @@
 package GUI;
 
+import javax.persistence.*;
+
 /**
- * Item is object used in the Shopping list as an list item.
+ * ShoppingList is object used in the Shopping list as an list item.
  * @author Hanna Haataja, hanna.haataja@cs.tamk.fi
  * @version 1.0, 11/20/2018
  * @since 1.0
  */
-public class Item {
+@Entity
+@Table
+public class ShoppingList {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private int id;
+    @Column(name = "quantity")
     private int quantity;
+    @Column(name = "ShoppingList")
     private String name;
 
     /**
@@ -15,7 +26,7 @@ public class Item {
      * @param name the name of the item.
      * @param quantity The quantity to bee bought from the shop.
      */
-    public Item(String name, int quantity){
+    public ShoppingList(String name, int quantity){
         setName(name);
         setQuantity(quantity);
     }

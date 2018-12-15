@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
  */
 public class DropboxHelper {
     private static DbxWebAuth auth;
-    private static DbxRequestConfig config = new DbxRequestConfig("fi.tamk.tiko.haataja.ShoppingList/0.1");
+    private static DbxRequestConfig config;
 
     /**
      * Generates the url needed to authorize the app.
@@ -31,6 +31,7 @@ public class DropboxHelper {
      * @return String Authorization url.
      */
     public static String init() {
+        config = DbxRequestConfig.newBuilder("fi.tamk.tiko.haataja.ShoppingList/1.0").build();
         DbxAppInfo appInfo = getAppInfo();
         if (appInfo != null) {
             auth = new DbxWebAuth(config, appInfo);
@@ -52,7 +53,7 @@ public class DropboxHelper {
     private static DbxClientV2 getClient(String authToken) {
         try {
             DbxAuthFinish authFinish = auth.finishFromCode(authToken);
-            System.out.println(authFinish.getAccessToken());
+            //System.out.println(authFinish.getAccessToken());
             return new DbxClientV2(config, authFinish.getAccessToken());
         } catch (Exception e) {
             System.out.println("Error while finishing Dropbox: " + e.getMessage());
@@ -101,9 +102,9 @@ public class DropboxHelper {
 
     private static DbxAppInfo getAppInfo() {
         try {
-            Parser parser = new Parser();
-            JSONObject object = parser.parse(new String(Files.readAllBytes(Paths.get("src/main/resources/test.app"))));
-            return new DbxAppInfo((String) object.get("key"), (String) object.get("secret"));
+
+            return DbxAppInfo.Reader.readFully(DropboxHelper.class.getClassLoader().getResourceAsStream("test.app"));
+
         } catch (Exception e) {
             e.printStackTrace();
         }

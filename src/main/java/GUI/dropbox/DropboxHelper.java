@@ -6,19 +6,15 @@ import com.dropbox.core.DbxAuthFinish;
 import com.dropbox.core.DbxRequestConfig;
 import com.dropbox.core.DbxWebAuth;
 import com.dropbox.core.v2.DbxClientV2;
-import fi.tamk.tiko.read.Parser;
-import fi.tamk.tiko.write.JSONObject;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.stream.Collectors;
 
 /**
  * This class handles all things related to the Dropbox connection.
  *
  * @author Hanna Haataja, hanna.haataja@cs.tamk.fi
- * @version 2.0, 12/04/2018
+ * @version 3.0, 12/15/2018
  * @since 2.0
  */
 public class DropboxHelper {
@@ -102,9 +98,7 @@ public class DropboxHelper {
 
     private static DbxAppInfo getAppInfo() {
         try {
-
             return DbxAppInfo.Reader.readFully(DropboxHelper.class.getClassLoader().getResourceAsStream("test.app"));
-
         } catch (Exception e) {
             e.printStackTrace();
         }

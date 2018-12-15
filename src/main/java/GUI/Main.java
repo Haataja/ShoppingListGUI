@@ -10,9 +10,9 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.image.Image;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
@@ -35,6 +35,7 @@ public class Main extends Application {
     private final ObservableList<ShoppingList> data =
             FXCollections.observableArrayList();
     private Stage stage;
+    private Background back;
 
     /**
      * Starts the program.
@@ -52,11 +53,16 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) {
         stage = primaryStage;
+        stage.getIcons().add(new Image(Main.class.getClassLoader().getResourceAsStream("images/list.png")));
         primaryStage.setTitle("Shopping list app");
         group = new BorderPane();
         group.setTop(new HBox(setMenu()));
         group.setCenter(setTable());
         group.setBottom(setBottom());
+        BackgroundImage myBI= new BackgroundImage(new Image(Main.class.getClassLoader().getResourceAsStream("images/back.png"),width,height,false,true),
+                BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT,
+                BackgroundSize.DEFAULT);
+        group.setBackground(new Background(myBI));
         scene = new Scene(group, width, height);
         primaryStage.setScene(scene);
         primaryStage.initStyle(StageStyle.DECORATED);
@@ -96,7 +102,8 @@ public class Main extends Application {
         info.setOnAction(event -> Dialogs.setCopyrightDialog());
         about.getItems().addAll(help, separator, info);
         menu.getMenus().addAll(file, about);
-
+        menu.setBackground(null);
+        menu.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(1))));
         return menu;
     }
 
@@ -136,6 +143,8 @@ public class Main extends Application {
         });
         table.getColumns().addAll(second, first);
         table.setItems(data);
+        table.setBackground(new Background(new BackgroundFill(new Color(0.883,0.909,0.999,1),CornerRadii.EMPTY,Insets.EMPTY)));
+        table.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(1))));
         VBox vbox = new VBox();
         vbox.setSpacing(5);
         vbox.setPadding(new Insets(10, 20, 0, 50));

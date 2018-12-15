@@ -6,11 +6,15 @@ import fi.tamk.tiko.read.Parser;
 import fi.tamk.tiko.write.JSONArray;
 import fi.tamk.tiko.write.JSONObject;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Pair;
@@ -37,6 +41,8 @@ public class Dialogs {
      */
     static void setCopyrightDialog() {
         Alert dialog = new Alert(Alert.AlertType.INFORMATION);
+        Stage dialogStage = (Stage) dialog.getDialogPane().getScene().getWindow();
+        dialogStage.getIcons().add(new Image(Dialogs.class.getClassLoader().getResourceAsStream("images/list.png")));
         dialog.setTitle("Shopping list app");
         dialog.setHeaderText(null);
         dialog.setContentText("Copyright Hanna Haataja 2018");
@@ -89,17 +95,19 @@ public class Dialogs {
         fileChooser.setTitle("Open Shopping list");
         fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("JSON", "*.json"));
         File file = fileChooser.showOpenDialog(stage);
-        try {
-            String text = new String(Files.readAllBytes(Paths.get(file.getAbsolutePath())));
-            Parser parser = new Parser();
-            JSONObject object = parser.parse(text);
-            JSONArray array = (JSONArray) object.get("list");
-            for (int i = 0; i < array.length(); i++) {
-                JSONObject listItem = (JSONObject) array.get(i);
-                data.add(new ShoppingList(listItem.get("item").toString(), (int) listItem.get("quantity")));
+        if (file != null) {
+            try {
+                String text = new String(Files.readAllBytes(Paths.get(file.getAbsolutePath())));
+                Parser parser = new Parser();
+                JSONObject object = parser.parse(text);
+                JSONArray array = (JSONArray) object.get("list");
+                for (int i = 0; i < array.length(); i++) {
+                    JSONObject listItem = (JSONObject) array.get(i);
+                    data.add(new ShoppingList(listItem.get("item").toString(), (int) listItem.get("quantity")));
+                }
+            } catch (IOException ex) {
+                System.out.println("Error while reading from file, " + ex.getMessage());
             }
-        } catch (IOException ex) {
-            System.out.println("Error while reading from file, " + ex.getMessage());
         }
     }
 
@@ -112,6 +120,8 @@ public class Dialogs {
     public static void setSaveToDropbox(Application application, List<ShoppingList> data) {
         Dialog<Pair<String, String>> dialog = new Dialog<>();
         dialog.setTitle("Save to Dropbox");
+        Stage dialogStage = (Stage) dialog.getDialogPane().getScene().getWindow();
+        dialogStage.getIcons().add(new Image(Dialogs.class.getClassLoader().getResourceAsStream("images/dropbox.png")));
         String url = DropboxHelper.init();
 
         ButtonType ok = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
@@ -129,10 +139,11 @@ public class Dialogs {
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
-        grid.setPadding(new Insets(20, 150, 10, 10));
+        grid.setPadding(new Insets(20, 20, 10, 10));
 
         TextField fileNameField = new TextField();
         fileNameField.setPromptText("example.json");
+        Platform.runLater(fileNameField::requestFocus);
         TextField tokenField = new TextField();
         tokenField.setPromptText("Dropbox code");
 
@@ -145,7 +156,7 @@ public class Dialogs {
         loginButton.setDisable(true);
 
         fileNameField.textProperty().addListener((observable, oldValue, newValue) -> loginButton.setDisable(newValue.trim().isEmpty()));
-        dialog.getDialogPane().setContent(grid);
+        dialog.getDialogPane().setContent(new HBox(grid, new ImageView(new Image(Dialogs.class.getClassLoader().getResourceAsStream("images/dropbox.png")))));
 
         //Platform.runLater(fileNameField::requestFocus);
 
@@ -165,7 +176,7 @@ public class Dialogs {
 
             File inputFile = new File(filename);
             if (writeFile(data, inputFile)) {
-                if(DropboxHelper.uploadToDropbox(token, inputFile)){
+                if (DropboxHelper.uploadToDropbox(token, inputFile)) {
                     setSuccessDialog(inputFile);
                 }
             }
@@ -202,6 +213,8 @@ public class Dialogs {
      */
     public static void setLoadFromDropbox(Application application, List<ShoppingList> data) {
         Dialog<Pair<String, String>> dialog = new Dialog<>();
+        Stage dialogStage = (Stage) dialog.getDialogPane().getScene().getWindow();
+        dialogStage.getIcons().add(new Image(Dialogs.class.getClassLoader().getResourceAsStream("images/dropbox.png")));
         dialog.setTitle("Load Dropbox");
         String url = DropboxHelper.init();
 
@@ -220,7 +233,7 @@ public class Dialogs {
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
-        grid.setPadding(new Insets(20, 150, 10, 10));
+        grid.setPadding(new Insets(20, 20, 10, 10));
 
         TextField fileNameField = new TextField();
         fileNameField.setPromptText("example.json");
@@ -229,6 +242,7 @@ public class Dialogs {
 
         grid.add(new Label("File name:"), 0, 0);
         grid.add(fileNameField, 1, 0);
+        Platform.runLater(fileNameField::requestFocus);
         grid.add(new Label("Dropbox code:"), 0, 1);
         grid.add(tokenField, 1, 1);
 
@@ -236,9 +250,7 @@ public class Dialogs {
         loginButton.setDisable(true);
 
         fileNameField.textProperty().addListener((observable, oldValue, newValue) -> loginButton.setDisable(newValue.trim().isEmpty()));
-        dialog.getDialogPane().setContent(grid);
-
-        //Platform.runLater(fileNameField::requestFocus);
+        dialog.getDialogPane().setContent(new HBox(grid, new ImageView(new Image(Dialogs.class.getClassLoader().getResourceAsStream("images/dropbox.png")))));
 
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == ok) {
@@ -273,17 +285,19 @@ public class Dialogs {
     /**
      * Sets dialog that tells files downloaded from Dropbox may take a while.
      */
-    public static void setTakeWhile(){
+    public static void setTakeWhile() {
         Alert dialog = new Alert(Alert.AlertType.INFORMATION);
+        Stage dialogStage = (Stage) dialog.getDialogPane().getScene().getWindow();
+        dialogStage.getIcons().add(new Image(Dialogs.class.getClassLoader().getResourceAsStream("images/dropbox.png")));
         dialog.setTitle("Downloading");
         dialog.setHeaderText(null);
         dialog.setContentText("Getting your file, this may take a while.");
         dialog.showAndWait();
     }
 
-    public static void setSaveToH2(List<ShoppingList> data){
+    public static void setSaveToH2(List<ShoppingList> data) {
         ConnectionHelper helper = new ConnectionHelper();
-        try{
+        try {
             helper.connect();
             helper.writeToDatabase(data);
 
@@ -292,7 +306,7 @@ public class Dialogs {
             dialog.setHeaderText(null);
             dialog.setContentText("Saved to H2!\nDatabase: \"~/ShoppingList\", \nTable: \"ShoppingList\"");
             dialog.showAndWait();
-        } catch (Exception e){
+        } catch (Exception e) {
             System.out.println("Error while handling H2 database!");
             //e.printStackTrace();
             setErrorH2("There was an error your shopping list is not saved.");
@@ -301,12 +315,12 @@ public class Dialogs {
         }
     }
 
-    public static void setReadFromH2(List<ShoppingList> data){
+    public static void setReadFromH2(List<ShoppingList> data) {
         ConnectionHelper helper = new ConnectionHelper();
-        try{
+        try {
             helper.connect();
             helper.readFromDatabase(data);
-        } catch (Exception e){
+        } catch (Exception e) {
             System.out.println("Error while handling H2 database!");
             e.printStackTrace();
             setErrorH2("Cannot read from H2 database.");
@@ -315,8 +329,10 @@ public class Dialogs {
         }
     }
 
-    private static void setErrorH2(String message){
+    private static void setErrorH2(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
+        Stage dialogStage = (Stage) alert.getDialogPane().getScene().getWindow();
+        dialogStage.getIcons().add(new Image(Dialogs.class.getClassLoader().getResourceAsStream("images/open.png")));
         alert.setTitle("Error While Handling H2 Database");
         alert.setHeaderText(message);
         alert.setContentText("Before trying again try to:\nDisconnect other connections to database ~/shoppingList" +

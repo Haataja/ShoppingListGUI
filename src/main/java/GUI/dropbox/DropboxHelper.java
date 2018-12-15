@@ -68,7 +68,9 @@ public class DropboxHelper {
             getClient(authToken).files().uploadBuilder("/" + inputFile.getName()).uploadAndFinish(input);
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("Error while loading " + inputFile.getName() + " to Dropbox: " + e.getMessage());
+            Dialogs.setErrorDropBox("Error while loading file: " + inputFile.getName() + " to Dropbox.");
+            //e.printStackTrace();
         }
         return false;
     }
@@ -90,7 +92,9 @@ public class DropboxHelper {
             return result;
 
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("Error in loading from the Dropbox: " + e.getMessage());
+            Dialogs.setErrorDropBox("Error while downloading from the Dropbox.");
+            //e.printStackTrace();
         }
         return null;
     }

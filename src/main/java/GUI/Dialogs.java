@@ -162,7 +162,7 @@ public class Dialogs {
 
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == ok) {
-                if(!fileNameField.getText().contains(".json")){
+                if (!fileNameField.getText().contains(".json")) {
                     fileNameField.setText(fileNameField.getText() + ".json");
                 }
                 return new Pair<>(fileNameField.getText(), tokenField.getText().trim());
@@ -257,7 +257,7 @@ public class Dialogs {
 
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == ok) {
-                if(!fileNameField.getText().contains(".json")){
+                if (!fileNameField.getText().contains(".json")) {
                     fileNameField.setText(fileNameField.getText() + ".json");
                 }
                 return new Pair<>(fileNameField.getText(), tokenField.getText().trim());
@@ -303,6 +303,7 @@ public class Dialogs {
 
     /**
      * Sets all the dialogs that relate to saving to H2 database.
+     *
      * @param data List of items in the shopping list.
      */
     public static void setSaveToH2(List<ShoppingList> data) {
@@ -315,7 +316,7 @@ public class Dialogs {
                 "User name: sa \nPassword: (empty)\nthis will be created if one does not exist.");
 
         Optional<ButtonType> result = alert.showAndWait();
-        if (result.isPresent() && result.get() == ButtonType.OK){
+        if (result.isPresent() && result.get() == ButtonType.OK) {
             ConnectionHelper helper = new ConnectionHelper();
             try {
                 helper.connect();
@@ -342,6 +343,7 @@ public class Dialogs {
 
     /**
      * Sets all the dialogs that relate to loading from H2 database.
+     *
      * @param data List of items in the shopping list.
      */
     public static void setReadFromH2(List<ShoppingList> data) {
@@ -357,8 +359,8 @@ public class Dialogs {
             dialog.setContentText("Items loaded from H2 database.");
             dialog.showAndWait();
         } catch (Exception e) {
-            System.out.println("Error while handling H2 database!");
-            e.printStackTrace();
+            System.out.println("Error while handling H2 database: " + e.getMessage());
+            //e.printStackTrace();
             setErrorH2("Cannot read from H2 database.");
         } finally {
             helper.close();
@@ -373,6 +375,29 @@ public class Dialogs {
         alert.setHeaderText(message);
         alert.setContentText("Before trying again try to:\nDisconnect other connections to database ~/shoppingList" +
                 "\nMake sure you get to database with credentials:\n\t\tUser name: sa, Password:(empty)");
+
+        alert.showAndWait();
+    }
+
+    /**
+     * Sets the dialog that tells something went wrong in the handling of the Dropbox.
+     * @param message Message shown to the user in header.
+     */
+    public static void setErrorDropBox(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        Stage dialogStage = (Stage) alert.getDialogPane().getScene().getWindow();
+        dialogStage.getIcons().add(new Image(Dialogs.class.getClassLoader().getResourceAsStream("images/dropbox.png")));
+        alert.setTitle("Error While Handling Dropbox");
+        alert.setHeaderText(message);
+        String instruction;
+        if (message.contains("downloading")) {
+            instruction = "Before trying again make sure:\n" +
+                    "- You have right name of the file\n- You copied whole of the token from Dropbox site\n";
+        } else {
+            instruction = "Before trying again make sure:\n" +
+                    "- Your file has unique name\n- You copied whole of the token from Dropbox site\n";
+        }
+        alert.setContentText(instruction);
 
         alert.showAndWait();
     }
